@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Don't Blink — Camera Edition</title>
+
+  <!-- MediaPipe FaceMesh + helpers (used for blink detection) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4/face_mesh.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4/camera_utils.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils@0.4/drawing_utils.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main id="app">
+    <header class="title">
+      <!-- new: website icon placed before title -->
+      <img class="site-icon" src="i.png" alt="Site" />
+      <h1>DON'T BLINK</h1>
+      <p class="subtitle">->Keep your eyes open. Touch or blink = you lose </p>
+      <p>->dont forget to remove your spec if you have.</p>
+    </header>
+
+    <!-- changed: wrap stage + sidebar for side-by-side layout on wide screens -->
+    <div class="main-grid">
+      <section class="stage">
+        <!-- video is visible and mirrored -->
+        <video id="camera" autoplay muted playsinline></video>
+
+        <!-- small avatar overlay (optional), you can remove if you prefer -->
+        <div id="avatarOverlay" aria-hidden="true">
+          <div class="small-eye left"></div>
+          <div class="small-eye right"></div>
+          <div class="small-mouth"></div>
+        </div>
+      </section>
+
+      <!-- sidebar contains UI + leaderboard (placed to the right on wider screens) -->
+      <aside class="sidebar">
+        <section class="ui">
+          <div id="status">Waiting for camera…</div>
+          <div id="timer">0.0s</div>
+
+          <!-- explicit user action to enable camera if autoplay blocked -->
+          <div style="margin-top:8px">
+            <button id="enableCameraBtn">Enable Camera</button>
+          </div>
+
+          <!-- NEW: meta row showing difficulty and high score -->
+          <div class="meta">
+            <div id="difficulty">Difficulty: 0</div>
+            <div id="highscore">High: —</div>
+          </div>
+
+          <!-- NEW: player name + leaderboard -->
+          <div class="name-row">
+            <input id="playerName" placeholder="Your name (for leaderboard)" />
+            <button id="lbSubmitBtn" disabled>Save</button>
+          </div>
+
+          <div class="controls">
+            <button id="startBtn">Start</button>
+            <button id="restartBtn" disabled>Restart</button>
+            <!-- NEW: share button -->
+            <button id="shareBtn" disabled title="Share your run">Share</button>
+          </div>
+          <div id="debug" aria-hidden="true"></div>
+        </section>
+
+        <!-- moved leaderboard into sidebar -->
+        <div id="leaderboard" aria-live="polite">
+          <div class="lb-title">Leaderboard</div>
+          <div id="leaderboardList" class="lb-list"></div>
+          <div class="lb-controls">
+            <button id="lbResetBtn">Reset</button>
+            <button id="lbExportBtn">Export</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script src="game.js"></script>
+
+  <!-- Made by credit (bottom-right) -->
+  <div class="credit">
+    <span>Made by Rakesh</span>
+    <a id="discordLink" href="http://discord.com/users/1413816839846236280" target="_blank" rel="noreferrer" title="Discord">
+      <!-- replaced inline SVG with local image d.jpg -->
+      <img class="discord-img" src="d.jpg" alt="Discord" />
+    </a>
+  </div>
+  </body>
+</html>

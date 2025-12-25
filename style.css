@@ -1,0 +1,217 @@
+/* style.css — mobile-first, clean layout */
+:root{
+  --bg:#06070a;
+  --accent:#ffd7b5;
+  --glass: rgba(255,255,255,0.06);
+  --text:#ffffff;
+}
+
+*{box-sizing:border-box}
+html,body,#app{height:100%;margin:0}
+body{
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(180deg,#091224 0%, #04050a 100%);
+  color: var(--text);
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+  padding:18px;
+}
+
+/* Title */
+.title{width:100%;max-width:420px;margin:6px 0 12px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.title h1{margin:0;font-size:20px;letter-spacing:2px}
+.title .subtitle{margin:6px 0 0;font-size:13px;opacity:0.85}
+.site-icon{
+  width:40px;
+  height:40px;
+  object-fit:contain;
+  margin-bottom:6px;
+  border-radius:6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+/* Stage: video + overlay */
+.stage{
+  width:100%;
+  max-width:420px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+  margin:0 auto;
+}
+
+/* camera video - visible, mirrored, circular */
+#camera{
+  width: 86vw;
+  max-width: 380px;
+  height: 86vw;
+  max-height: 380px;
+  border-radius: 50%;
+  object-fit: cover; /* crop to fill circle */
+  transform: scaleX(-1); /* mirror so it feels like a mirror */
+  box-shadow: 0 18px 60px rgba(0,0,0,0.6), inset 0 -12px 24px rgba(0,0,0,0.18);
+  border: 6px solid rgba(255,215,180,0.06);
+  background: #333;
+}
+
+/* small avatar overlay (decorative) — optional */
+#avatarOverlay{
+  position:absolute;
+  width:86vw;
+  max-width:380px;
+  height:86vw;
+  max-height:380px;
+  border-radius:50%;
+  pointer-events:none;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  transform: translateY(-4px);
+}
+.small-eye{
+  width:10%;
+  height:10%;
+  background:rgba(0,0,0,0.6);
+  border-radius:50%;
+  position:absolute;
+  top:30%;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+  /* new: make scaling look smooth and collapse fully when closed */
+  transform-origin: center center;
+  transition: transform 120ms linear, border-radius 120ms linear, background-color 120ms linear;
+}
+.small-eye.left{ left:26% }
+.small-eye.right{ right:26% }
+.small-mouth{
+  position:absolute;
+  bottom:28%;
+  left:50%;
+  transform:translateX(-50%);
+  width:36%;
+  height:8%;
+  background:rgba(0,0,0,0.6);
+  border-radius:0 0 18vmin 18vmin;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+}
+
+/* UI below the video */
+.ui{
+  width:100%;
+  max-width:420px;
+  margin-top:12px;
+  text-align:center;
+}
+#status{font-size:18px;margin-bottom:6px}
+#timer{font-size:14px;color:rgba(255,255,255,0.78);margin-bottom:8px}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:6px}
+button{
+  padding:10px 14px;border-radius:10px;border:none;background:var(--accent);color:#000;font-weight:600;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.35);cursor:pointer;
+}
+button:disabled{opacity:0.45;cursor:not-allowed}
+#debug{margin-top:8px;font-size:12px;color:rgba(255,255,255,0.6)}
+
+/* Meta row and share button */
+.meta{display:flex;justify-content:space-between;align-items:center;margin:6px 0;color:rgba(255,255,255,0.78);font-size:13px}
+#shareBtn{background:#ffd7b5;color:#000;padding:8px 10px;border-radius:10px;border:none;font-weight:700}
+#shareBtn:disabled{opacity:0.45;cursor:not-allowed}
+
+/* Name input and leaderboard */
+.name-row{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:8px}
+.name-row input{flex:1;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:var(--text)}
+.name-row button{padding:8px 10px;border-radius:10px;border:none;background:var(--accent);font-weight:700}
+
+#leaderboard{margin-top:10px;background:rgba(255,255,255,0.02);padding:8px;border-radius:10px}
+.lb-title{font-size:13px;margin-bottom:6px;color:rgba(255,255,255,0.85);font-weight:600}
+.lb-list{max-height:160px;overflow:auto;padding:6px;display:flex;flex-direction:column;gap:6px}
+.lb-entry{background:rgba(0,0,0,0.25);padding:6px;border-radius:8px;font-size:13px}
+.lb-empty{color:rgba(255,255,255,0.55);font-size:13px}
+.lb-controls{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.lb-controls button{padding:8px 10px;border-radius:10px;border:none;background:#444;color:#fff}
+
+/* Enable camera button */
+#enableCameraBtn{margin:0 auto;padding:8px 12px;border-radius:10px;border:none;background:#7fb3ff;color:#000;font-weight:700;display:block}
+#enableCameraBtn.hidden{display:none}
+
+/* new: main two-column layout (stack on small screens) */
+.main-grid{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  align-items:center;
+  width:100%;
+  max-width:920px;
+  margin:0 auto;
+}
+/* sidebar stacks under stage on small screens */
+.sidebar{ width:100%; max-width:420px; display:flex; flex-direction:column; gap:12px; align-items:stretch }
+
+/* on wider screens place stage left and sidebar right */
+@media (min-width:880px){
+  .main-grid{
+    flex-direction:row;
+    align-items:flex-start;
+    justify-content:space-between;
+  }
+  .stage{ flex:0 0 52%; max-width:520px }
+  .sidebar{ flex:0 0 42%; max-width:360px }
+  /* ensure leaderboard block takes full sidebar width */
+  #leaderboard{ width:100% }
+}
+
+/* tweak leaderboard look for sidebar */
+#leaderboard{ margin-top:0 } /* removed extra top gap when in sidebar */
+
+/* Mobile adjustments */
+@media (min-width:700px){
+  #camera{ width:380px; height:380px }
+  #avatarOverlay{ width:380px; height:380px }
+}
+@media (min-width:500px){
+  .title h1{ font-size:24px }
+}
+@media (min-width:400px){
+  #camera{ width:360px; height:360px }
+  #avatarOverlay{ width:360px; height:360px }
+}
+@media (min-width:350px){
+  #camera{ width:320px; height:320px }
+  #avatarOverlay{ width:320px; height:320px }
+}
+@media (max-width:320px){
+  body{ padding:12px }
+}
+
+/* bottom-right credit */
+.credit{
+  position:fixed;
+  right:12px;
+  bottom:12px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  background: rgba(0,0,0,0.36);
+  padding:6px 10px;
+  border-radius:10px;
+  font-size:12px;
+  color:rgba(255,255,255,0.9);
+  z-index:9999;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+.credit a{ display:inline-flex; align-items:center; justify-content:center; color:inherit; text-decoration:none }
+.credit svg{ opacity:0.95; transform:translateY(1px) }
+.credit:hover{ transform: translateY(-1px); transition: transform 160ms ease }
+.credit img.discord-img{
+  width:18px;
+  height:18px;
+  object-fit:cover;
+  border-radius:4px;
+}
+
+/* make sure credit remains unobtrusive on small screens */
+@media (max-width:420px){
+  .site-icon{ width:32px; height:32px }
+  .credit img.discord-img{ width:16px; height:16px }
+}
