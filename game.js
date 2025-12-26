@@ -1,6 +1,6 @@
 // game.js — Don't Blink with MediaPipe FaceMesh blink detection
 // Make sure index.html includes the MediaPipe face_mesh & camera_utils scripts before this file.
-import { Analytics } from "@vercel/analytics/next"
+
 const video = document.getElementById("camera");
 const statusEl = document.getElementById("status");
 const timerEl = document.getElementById("timer");
@@ -227,7 +227,12 @@ function onFaceResults(results) {
   const rightEAR = computeEAR(lm, RIGHT_EYE_IDXS);
   debugEl.textContent = `l:${leftEAR.toFixed(3)} r:${rightEAR.toFixed(3)} thr:${dynamicEarThreshold.toFixed(3)}`;
 
-  // avatar mimic: scale eyes and mouth based on landmarks
+  // maintain EAR history (prune old samples)
+  const nowMs = performance.now();
+  earHistory.push({ t: nowMs, left: leftEAR, right: rightEAR });
+  while (earHistory.length && nowMs - earHistory[0].t > EAR_HISTORY_MS) earHistory.shift();
+
+  // === Avatar mimic (unchanged) ===
   try {
     // map EAR to a vertical scale in [0.02 .. 1]
     const MIN_EAR_VIS = 0.02; // ear value that maps to effectively fully closed
@@ -272,15 +277,56 @@ function onFaceResults(results) {
   const elapsed = (performance.now() - startTime) / 1000;
   updateDynamicDetection(elapsed);
 
-  // NEW: detect blink via threshold OR via very fast EAR drop even if momentary
-  const nowMs = performance.now();
+  // === Blink detection: combined checks ===
+
+  // 1) Instant threshold: immediate closure
+  const instantLeftClosed = (leftEAR <= dynamicEarThreshold);
+  const instantRightClosed = (rightEAR <= dynamicEarThreshold);
+
+  // 2) Fast drop detection (sudden drop between frames)
   const leftDrop = prevLeftEAR - leftEAR;
   const rightDrop = prevRightEAR - rightEAR;
-
   const leftFastBlink = (leftDrop > BLINK_DROP_DELTA) && (leftEAR <= dynamicEarThreshold + DROP_MARGIN);
   const rightFastBlink = (rightDrop > BLINK_DROP_DELTA) && (rightEAR <= dynamicEarThreshold + DROP_MARGIN);
 
-  if (leftEAR < dynamicEarThreshold || rightEAR < dynamicEarThreshold || leftFastBlink || rightFastBlink) {
+  // 3) Consecutive-frame detection (treat near-threshold as closed to catch gradual closure)
+  if (leftEAR <= dynamicEarThreshold || leftEAR <= dynamicEarThreshold + NEAR_THRESHOLD_MARGIN) {
+    leftClosedFrames++;
+  } else {
+    leftClosedFrames = 0;
+  }
+  if (rightEAR <= dynamicEarThreshold || rightEAR <= dynamicEarThreshold + NEAR_THRESHOLD_MARGIN) {
+    rightClosedFrames++;
+  } else {
+    rightClosedFrames = 0;
+  }
+  const leftConsecBlink = leftClosedFrames >= dynamicClosedConsec;
+  const rightConsecBlink = rightClosedFrames >= dynamicClosedConsec;
+
+  // 4) Sustained/smooth drop (slow blink): compare recent max/avg to current within SLOW_WINDOW_MS
+  let slowLeftBlink = false;
+  let slowRightBlink = false;
+  // build window samples
+  const windowStart = nowMs - SLOW_WINDOW_MS;
+  const windowSamples = earHistory.filter(s => s.t >= windowStart);
+  if (windowSamples.length >= 2) {
+    const maxLeft = Math.max(...windowSamples.map(s => s.left));
+    const maxRight = Math.max(...windowSamples.map(s => s.right));
+    const avgLeft = windowSamples.reduce((s,v)=>s+v.left,0)/windowSamples.length;
+    const avgRight = windowSamples.reduce((s,v)=>s+v.right,0)/windowSamples.length;
+
+    // if current EAR is notably lower than recent max/avg and is near/under threshold, treat as blink
+    if ((maxLeft - leftEAR > SLOW_DROP_DELTA || avgLeft - leftEAR > (SLOW_DROP_DELTA*0.7)) &&
+        leftEAR <= dynamicEarThreshold + DROP_MARGIN) slowLeftBlink = true;
+    if ((maxRight - rightEAR > SLOW_DROP_DELTA || avgRight - rightEAR > (SLOW_DROP_DELTA*0.7)) &&
+        rightEAR <= dynamicEarThreshold + DROP_MARGIN) slowRightBlink = true;
+  }
+
+  // Final decision: if any detection flags true -> lose
+  if (instantLeftClosed || instantRightClosed ||
+      leftFastBlink || rightFastBlink ||
+      leftConsecBlink || rightConsecBlink ||
+      slowLeftBlink || slowRightBlink) {
     lose("You blinked 😏");
     // update previous values before exiting
     prevLeftEAR = leftEAR;
@@ -327,6 +373,14 @@ async function startCameraAndFaceMesh() {
 
 // request media if we don't already have it
 async function tryInitCamera() {
+  // feature detect to give clearer error messages
+  if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !== "function") {
+    const msg = "getUserMedia not supported by this browser.";
+    console.error(msg);
+    if (statusEl) statusEl.textContent = msg;
+    throw new Error(msg);
+  }
+
   if (!cameraStream) {
     cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 640, height: 480 }, audio: false });
     video.srcObject = cameraStream;
@@ -642,6 +696,13 @@ function restart() {
     if (cameraController && !cameraController._running) cameraController.start();
   } catch (e) { console.warn("Could not restart cameraController:", e); }
 }
+
+// New: improved blink detection helpers/history
+const EAR_HISTORY_MS = 700;        // how far back to keep EAR samples
+const SLOW_DROP_DELTA = 0.06;     // sustained drop considered a slow blink
+const SLOW_WINDOW_MS = 500;       // window to evaluate sustained drop
+const NEAR_THRESHOLD_MARGIN = 0.02; // treat slightly-above-threshold as "near closed" for frame counters
+let earHistory = []; // {t, left, right}
 
 // New: detect very quick blinks by looking for fast EAR drops between frames
 const BLINK_DROP_DELTA = 0.08; // sudden drop in EAR considered a blink
