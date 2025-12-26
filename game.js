@@ -535,11 +535,31 @@ async function init() {
 
   renderLeaderboard();
 
+  // don't auto-request camera if the page is embedded in an iframe (Vercel preview) or insecure origin.
   try {
-    await startCameraAndFaceMesh();
-    statusEl.textContent = "Camera ready. Press START";
-  } catch(e){
-    console.warn("Camera/FaceMesh init failed:", e);
+    const inIframe = (window.self !== window.top);
+    const secure = (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1');
+
+    if (inIframe) {
+      statusEl.textContent = "Open in a new tab to enable camera (blocked in embed).";
+      if (enableCameraBtn) { enableCameraBtn.disabled = false; enableCameraBtn.classList.remove("hidden"); }
+    } else if (!secure) {
+      statusEl.textContent = "Camera requires HTTPS or localhost. Serve over HTTPS to enable camera.";
+      if (enableCameraBtn) { enableCameraBtn.disabled = false; enableCameraBtn.classList.remove("hidden"); }
+    } else {
+      // safe to try auto-init (top-level + secure)
+      try {
+        await startCameraAndFaceMesh();
+        statusEl.textContent = "Camera ready. Press START";
+      } catch(e){
+        console.warn("Camera/FaceMesh init failed:", e);
+        // ensure user can still enable camera via button
+        if (enableCameraBtn) { enableCameraBtn.disabled = false; enableCameraBtn.classList.remove("hidden"); }
+      }
+    }
+  } catch (e) {
+    console.warn("init check failed:", e);
+    statusEl.textContent = "Ready. Use 'Enable Camera' to start.";
   }
 }
 
