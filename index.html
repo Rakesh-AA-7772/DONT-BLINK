@@ -16,11 +16,12 @@
 <body>
   <main id="app">
     <header class="title">
-      <!-- new: website icon placed before title -->
-      <img class="site-icon" src="i.png" alt="Site" />
-      <h1>DON'T BLINK</h1>
-      <p class="subtitle">->Keep your eyes open. Touch or blink = you lose </p>
-      <p>->dont forget to remove your spec if you have.</p>
+      <!-- changed: create a title-row with a Rules button -->
+      <div class="title-row">
+        <img class="site-icon" src="i.png" alt="Site" />
+        <h1>DON'T BLINK</h1>
+        <a class="rules-link" href="rules.html" title="Rules">ABOUT GAME..(read this first)</a>
+      </div>
     </header>
 
     <!-- embed banner (hidden by default; shown by JS if in iframe) -->
@@ -92,6 +93,9 @@
 
   <script src="game.js"></script>
 
+  <!-- hidden canvas used by game.js to sample frame brightness -->
+  <canvas id="videoCanvas" width="160" height="120" style="display:none"></canvas>
+
   <!-- Made by credit (bottom-right) -->
   <div class="credit">
     <span>Made by Rakesh</span>
@@ -115,6 +119,20 @@
       } catch(e){
         // ignore cross-origin errors
       }
+    })();
+
+    // about bar toggle (accessible)
+    (function(){
+      const bar = document.getElementById('aboutBar');
+      const content = document.getElementById('aboutContent');
+      if (!bar || !content) return;
+      function toggle() {
+        const expanded = bar.getAttribute('aria-expanded') === 'true';
+        bar.setAttribute('aria-expanded', String(!expanded));
+        content.hidden = expanded;
+      }
+      bar.addEventListener('click', toggle);
+      bar.addEventListener('keydown', (e)=> { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }});
     })();
   </script>
 </body>
