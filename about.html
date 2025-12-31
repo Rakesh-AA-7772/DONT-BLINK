@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>About — DON'T BLINK v1.5 (2)</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* small page-specific adjustments for professional look */
+    .about-wrap{ max-width:820px; margin:36px auto; background:rgba(255,255,255,0.02); padding:22px; border-radius:12px; box-shadow: 0 18px 60px rgba(0,0,0,0.6); }
+    .about-header{ display:flex; gap:14px; align-items:center; margin-bottom:12px }
+    .about-header img{ width:56px; height:56px; border-radius:10px }
+    .about-title{ font-size:20px; font-weight:800; color:var(--text) }
+    .about-sub{ color:rgba(255,255,255,0.76); margin-top:4px }
+    .changelog{ margin-top:12px; display:grid; gap:8px }
+    .ch-entry{ padding:10px; background:rgba(0,0,0,0.24); border-radius:8px }
+    .back-row{ margin-top:18px; display:flex; justify-content:flex-end }
+    .back-row a{ text-decoration:none; padding:8px 12px; border-radius:8px; background:var(--accent); color:#000; font-weight:700 }
+  </style>
+</head>
+<body>
+  <main style="padding:18px;">
+    <div class="about-wrap">
+      <div class="about-header">
+        <img src="i.png" alt="Site icon" />
+        <div>
+          <div class="about-title">DON'T BLINK — v1.5 (2)</div>
+          <div class="about-sub">Stricter zone detection, sharing, and improved UX. Built with MediaPipe FaceMesh.</div>
+        </div>
+      </div>
+
+      <section>
+        <h3 style="margin:0 0 8px 0;color:var(--accent)">What's new in v1.5 (2)</h3>
+        <div class="changelog">
+          <div class="ch-entry">
+            <strong>Immediate zone enforcement</strong> — leaving the camera zone immediately stops the timer and prevents score submission (cheating protection).
+          </div>
+          <div class="ch-entry">
+            <strong>Share feature</strong> — share your latest run via native share or copy-to-clipboard.
+          </div>
+          <div class="ch-entry">
+            <strong>UI improvements</strong> — About link added to header and a polished About page.
+          </div>
+        </div>
+
+        <h3 style="margin-top:16px;color:var(--accent)">Credits & Notes</h3>
+        <p style="color:rgba(255,255,255,0.82)">Made by Rakesh. Face detection is provided by MediaPipe FaceMesh. For best results, play in good lighting and keep your face centered in the camera feed.</p>
+
+        <div class="back-row">
+          <a href="index.html">Back to game</a>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
